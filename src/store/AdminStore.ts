@@ -7,6 +7,8 @@ import {
     RaffleTicketPackage,
     Task,
     CurrentRaffle,
+    CreateProductDTO,
+    CreateRaffleTicketPackageDTO,
 } from "@/types/types";
 import {
     getDailyRewards,
@@ -201,7 +203,7 @@ export default class AdminStore {
     }
 
     // ====== Product ======
-    async createProduct(product: Product) {
+    async createProduct(product: CreateProductDTO) {
         try {
             const data = await createProduct(product);
             runInAction(() => {
@@ -230,7 +232,7 @@ export default class AdminStore {
         }
     }
 
-    async updateProduct(id: number, product: Product) {
+    async updateProduct(id: number, product: CreateProductDTO) {
         try {
             const data = await updateProduct(id, product);
             runInAction(() => {
@@ -357,7 +359,7 @@ export default class AdminStore {
     }
 
     // ====== RaffleTicketPackage ======
-    async createPackage(p: RaffleTicketPackage) {
+    async createPackage(p: CreateRaffleTicketPackageDTO) {
         try {
             const data = await createPackage(p);
             runInAction(() => {
@@ -386,7 +388,7 @@ export default class AdminStore {
         }
     }
 
-    async updatePackage(id: number, p: RaffleTicketPackage) {
+    async updatePackage(id: number, p: CreateRaffleTicketPackageDTO) {
         try {
             const data = await updatePackage(id, p);
             runInAction(() => {

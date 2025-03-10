@@ -1,4 +1,4 @@
-import { DailyReward, Product, Raffle, RafflePrize, RaffleTicketPackage, Task } from "@/types/types";
+import { CreateProductDTO, CreateRaffleTicketPackageDTO, DailyReward, Raffle, RafflePrize, Task } from "@/types/types";
 import { $authHost } from "./index";
 
 // ====== DailyReward ======
@@ -38,7 +38,7 @@ export const updateTask = async (id: number, task: Task) => {
 
 // ====== Product ======
 
-export const createProduct = async (product: Product) => {
+export const createProduct = async (product: CreateProductDTO) => {
     const { data } = await $authHost.post('api/product/create', product);
     return data;
 }
@@ -48,7 +48,7 @@ export const getAllProducts = async () => {
     return data;
 }
 
-export const updateProduct = async (id: number, product: Product) => {
+export const updateProduct = async (id: number, product: CreateProductDTO) => {
     const { data } = await $authHost.put(`api/product/update/${id}`, product);
     return data;
 }
@@ -102,7 +102,7 @@ export const updatePrize = async (id: number, prize: RafflePrize) => {
 
 // ====== RaffleTicketPackage ======
 
-export const createPackage = async (p: RaffleTicketPackage) => {
+export const createPackage = async (p: CreateRaffleTicketPackageDTO) => {
     const { data } = await $authHost.post('api/raffle/package/create', p);
     return data;
 }
@@ -112,7 +112,7 @@ export const getAllPackages = async () => {
     return data;
 }
 
-export const updatePackage = async (id: number, p: RaffleTicketPackage) => {
+export const updatePackage = async (id: number, p: CreateRaffleTicketPackageDTO) => {
     const { data } = await $authHost.put(`api/raffle/package/${id}`, p);
     return data;
 }

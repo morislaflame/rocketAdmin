@@ -54,6 +54,10 @@ export interface IRoute {
     attempts: number;
     starsPrice: number;
   }
+
+  // Создадим тип без id, чтобы передавать его в create
+export type CreateProductDTO = Omit<Product, "id">;
+
   
   export interface Raffle {
     id: number;
@@ -110,6 +114,8 @@ export interface IRoute {
     ticketCount: number;
     price: number;
   }
+
+  export type CreateRaffleTicketPackageDTO = Omit<RaffleTicketPackage, "id">;
 
   export interface UserPrize {
     id: number;

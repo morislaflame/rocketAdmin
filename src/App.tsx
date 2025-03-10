@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { Context, IStoreContext } from "./store/StoreProvider";
 import "./App.css";
 import LoadingIndicator from "./components/ui/LoadingIndicator";
+import Navigation from "./components/MainComponents/Navigation";
 
 // Lazy-loaded Components
 
@@ -48,6 +49,7 @@ const App = observer(() => {
 
   return (
       <BrowserRouter>
+      <Navigation />
       <Suspense
         fallback={
           <LoadingIndicator />

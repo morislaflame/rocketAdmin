@@ -1,10 +1,12 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import LoadingIndicator from "../components/ui/LoadingIndicator";
 import UserStore from "../store/UserStore";
+import AdminStore from "../store/AdminStore";
 
 // Определяем интерфейс для нашего контекста
 export interface IStoreContext {
   user: UserStore;
+  admin: AdminStore;
 }
 
 // Создаем контекст с начальным значением null, но указываем правильный тип
@@ -18,18 +20,22 @@ interface StoreProviderProps {
 const StoreProvider = ({ children }: StoreProviderProps) => {
   const [stores, setStores] = useState<{
     user: UserStore;
+    admin: AdminStore;
   } | null>(null);
 
   useEffect(() => {
     const loadStores = async () => {
       const [
         { default: UserStore },
+        { default: AdminStore },
       ] = await Promise.all([
         import("../store/UserStore"),
+        import("../store/AdminStore"),
       ]);
 
       setStores({
         user: new UserStore(),
+        admin: new AdminStore(),
       });
     };
 

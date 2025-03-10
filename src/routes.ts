@@ -2,12 +2,13 @@
 import LoginPage from './pages/LoginPage/LoginPage';
 import NotAdminPage from './pages/NotAdminPage/NotAdminPage';
 import AdminPage from './pages/AdminPage/AdminPage';
-import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE } from './utils/consts';
+import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE } from './utils/consts';
 import { IRoute, UserInfo } from './types/types';
 import AttemptsPackagePage from './pages/AttemptsPackagePage/AttemptsPackagePage';
 import RafflePage from './pages/RafflePage/RafflePage';
 import DailyRewardPage from './pages/DailyRewardPage/DailyRewardPage';
 import TasksPage from './pages/TasksPage/TasksPage';
+import TicketsPackagePage from './pages/TicketsPackagePage/TicketsPackagePage';
 
 export const authRoutes = (user: UserInfo | null) => {
     console.log("User in authRoutes:", user);
@@ -45,6 +46,11 @@ export const authRoutes = (user: UserInfo | null) => {
             path: RAFFLE_ROUTE,
             Component: RafflePage
         });
+        routes.push({
+            path: TICKETS_PACKAGE_ROUTE,
+            Component: TicketsPackagePage
+        });
+
 
     } else {
         console.log("User is not admin");
