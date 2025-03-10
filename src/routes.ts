@@ -1,0 +1,64 @@
+// src/routes.ts (если у вас массив роутов)
+import LoginPage from './pages/LoginPage/LoginPage';
+import NotAdminPage from './pages/NotAdminPage/NotAdminPage';
+import AdminPage from './pages/AdminPage/AdminPage';
+import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE } from './utils/consts';
+import { IRoute, UserInfo } from './types/types';
+import AttemptsPackagePage from './pages/AttemptsPackagePage/AttemptsPackagePage';
+import RafflePage from './pages/RafflePage/RafflePage';
+import DailyRewardPage from './pages/DailyRewardPage/DailyRewardPage';
+import TasksPage from './pages/TasksPage/TasksPage';
+
+export const authRoutes = (user: UserInfo | null) => {
+    console.log("User in authRoutes:", user);
+
+    if (!user) {
+        return [];
+      }
+
+    const routes: IRoute[] = [
+        {
+            path: NOT_FOUND_ROUTE,
+            Component: NotAdminPage
+        },
+    ];
+    
+    if (user && user.role === 'ADMIN') {
+        console.log("User is admin, adding admin route");
+        routes.push({
+            path: ADMIN_ROUTE,
+            Component: AdminPage
+        });
+        routes.push({
+            path: TASKS_ROUTE,
+            Component: TasksPage
+        });
+        routes.push({
+            path: DAILY_REWARD_ROUTE,
+            Component: DailyRewardPage
+        });
+        routes.push({
+            path: ATTEMPTS_PACKAGE_ROUTE,
+            Component: AttemptsPackagePage
+        });
+        routes.push({
+            path: RAFFLE_ROUTE,
+            Component: RafflePage
+        });
+
+    } else {
+        console.log("User is not admin");
+    }
+
+    return routes;
+};
+
+
+export const publicRoutes: IRoute[] = [
+    
+    {
+        path: LOGIN_ROUTE,
+        Component: LoginPage 
+    },
+    
+];
