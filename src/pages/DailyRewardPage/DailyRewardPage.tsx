@@ -26,8 +26,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// Тип, соответствующий сущности DailyReward
-import { DailyReward } from "@/types/types";
+// Типы
+import { DailyReward, ServerError } from "@/types/types";
+import { toast } from "sonner";
 
 const DailyRewardPage: React.FC = observer(() => {
   const { admin } = useContext(Context) as IStoreContext;
@@ -35,14 +36,18 @@ const DailyRewardPage: React.FC = observer(() => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedReward, setSelectedReward] = useState<DailyReward | null>(null);
 
-  // Загрузка всех наград при монтировании
+  // Загрузка наград
   useEffect(() => {
-    admin.getDailyRewards();
+    admin.getDailyRewards().catch((err) => {
+      const serverError = err as ServerError;
+      console.error("Ошибка при загрузке DailyRewards:", err);
+      toast.error(serverError?.response?.data?.message || "Ошибка при загрузке ежедневных наград");
+    });
   }, [admin]);
 
   // "Добавить награду"
   const handleAddClick = () => {
-    setSelectedReward(null); // диалог будет пустой
+    setSelectedReward(null);
     setOpenDialog(true);
   };
 
@@ -52,45 +57,44 @@ const DailyRewardPage: React.FC = observer(() => {
     setOpenDialog(true);
   };
 
-  // Сохранение награды (новой или уже существующей)
+  // Сохранение (добавление или редактирование)
   const handleSave = async () => {
     if (!selectedReward) return;
 
     try {
+      // Если есть id, обновляем по day
       if (selectedReward.id) {
-        // Если награда уже существует (есть id):
-        // обновляем по day (на бэке updateDailyRewardByDay принимает в URL day)
         await admin.updateDailyRewardByDay(selectedReward.day, {
-          // Объект без day: day указывается в URL
           reward: selectedReward.reward,
           rewardType: selectedReward.rewardType,
           description: selectedReward.description,
         } as DailyReward);
+        toast.success("Награда успешно обновлена");
       } else {
-        // Иначе создаём новую награду
+        // Создаём новую
         await admin.createDailyReward({
-          // Здесь day обязателен, так как бэк создает запись конкретно на этот день
           day: selectedReward.day,
           reward: selectedReward.reward,
           rewardType: selectedReward.rewardType,
           description: selectedReward.description,
-          // id не передаём: он сгенерируется
         } as DailyReward);
+        toast.success("Награда успешно создана");
       }
 
-      // Перезагружаем список, закрываем диалог
+      // Обновляем список
       await admin.getDailyRewards();
       setOpenDialog(false);
       setSelectedReward(null);
     } catch (error) {
+      const serverError = error as ServerError;
       console.error("Ошибка при сохранении DailyReward:", error);
+      toast.error(serverError?.response?.data?.message || "Ошибка при сохранении награды");
     }
   };
 
   // Меняем поля формы
   const handleChangeField = (field: keyof DailyReward, value: string) => {
     if (!selectedReward) {
-      // Создаём новый объект для формы
       setSelectedReward({
         ...({} as DailyReward),
         [field]: field === "day" || field === "reward" ? Number(value) : value,
@@ -112,7 +116,7 @@ const DailyRewardPage: React.FC = observer(() => {
         Добавить награду
       </Button>
 
-      {/* Таблица с наградами */}
+      {/* Таблица */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -142,7 +146,7 @@ const DailyRewardPage: React.FC = observer(() => {
         </TableBody>
       </Table>
 
-      {/* Диалог для редактирования/добавления */}
+      {/* Диалог */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
@@ -155,7 +159,6 @@ const DailyRewardPage: React.FC = observer(() => {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            {/* day */}
             <div>
               <Label htmlFor="day">День (1..7)</Label>
               <Input
@@ -166,8 +169,6 @@ const DailyRewardPage: React.FC = observer(() => {
                 placeholder="Например: 1"
               />
             </div>
-
-            {/* reward */}
             <div>
               <Label htmlFor="reward">Размер награды</Label>
               <Input
@@ -178,8 +179,6 @@ const DailyRewardPage: React.FC = observer(() => {
                 placeholder="Например: 10"
               />
             </div>
-
-            {/* rewardType */}
             <div>
               <Label htmlFor="rewardType">Тип награды</Label>
               <Input
@@ -189,8 +188,6 @@ const DailyRewardPage: React.FC = observer(() => {
                 placeholder="attempts или tokens"
               />
             </div>
-
-            {/* description */}
             <div>
               <Label htmlFor="description">Описание</Label>
               <Textarea

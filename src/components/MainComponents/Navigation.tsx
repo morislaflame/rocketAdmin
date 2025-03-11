@@ -9,7 +9,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE } from "@/utils/consts"
+import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE } from "@/utils/consts"
 
 const taskComponents = [
     {
@@ -26,10 +26,15 @@ const taskComponents = [
 
 const raffleComponents = [
     {
-        title: "Розыгрыши",
+        title: "Текущий розыгрыш",
         href: RAFFLE_ROUTE,
         description: "Управление текущими и прошедшими розыгрышами призов."
     },
+    {
+        title: "Все розыгрыши",
+        href: ALL_RAFFLES_ROUTE,
+        description: "Просмотр всех розыгрышей."
+    }
 ]
 
 const productComponents = [
@@ -43,6 +48,14 @@ const productComponents = [
         href: TICKETS_PACKAGE_ROUTE,
         description: "Пакеты билетов за Ton"
     },
+]
+
+const usersComponents = [
+    {
+        title: "Пользователи",
+        href: USERS_ROUTE,
+        description: "Просмотр всех пользователей."
+    }
 ]
 
 const Navigation: React.FC = () => {
@@ -89,6 +102,23 @@ const Navigation: React.FC = () => {
                     <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[400px] md:grid-cols-2">
                             {productComponents.map((component) => (
+                                <ListItem
+                                    key={component.title}
+                                    title={component.title}
+                                    href={component.href}
+                                >
+                                    {component.description}
+                                </ListItem>
+                            ))}
+                        </ul>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                    <NavigationMenuTrigger>Пользователи</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                        <ul className="grid w-[400px] gap-3 p-4 md:w-[400px] md:grid-cols-2">
+                            {usersComponents.map((component) => (
                                 <ListItem
                                     key={component.title}
                                     title={component.title}

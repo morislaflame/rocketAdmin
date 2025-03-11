@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Context, IStoreContext } from "@/store/StoreProvider";
 
-// Компоненты из shadcn/ui
+// Компоненты shadcn/ui
 import {
   Table,
   TableBody,
@@ -25,8 +25,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-// Импортируем ваш интерфейс RaffleTicketPackage
-import { RaffleTicketPackage } from "@/types/types";
+// Импортируем ваш интерфейс RaffleTicketPackage и тип ошибки
+import { RaffleTicketPackage, ServerError } from "@/types/types";
+// Импортируем toast из sonner
+import { toast } from "sonner";
 
 const TicketsPackagePage: React.FC = observer(() => {
   const { admin } = useContext(Context) as IStoreContext;
@@ -36,12 +38,16 @@ const TicketsPackagePage: React.FC = observer(() => {
 
   // При первом монтировании загружаем пакеты
   useEffect(() => {
-    admin.getAllPackages();
+    admin.getAllPackages().catch((err) => {
+      const serverError = err as ServerError;
+      console.error("Ошибка при загрузке пакетов:", err);
+      toast.error(serverError?.response?.data?.message || "Ошибка при загрузке пакетов");
+    });
   }, [admin]);
 
   // "Добавить пакет"
   const handleAddClick = () => {
-    setSelectedPackage(null); // форма откроется пустой
+    setSelectedPackage(null);
     setOpenDialog(true);
   };
 
@@ -63,6 +69,7 @@ const TicketsPackagePage: React.FC = observer(() => {
           ticketCount: selectedPackage.ticketCount,
           price: selectedPackage.price,
         });
+        toast.success("Пакет успешно обновлён");
       } else {
         // Создаём
         await admin.createPackage({
@@ -70,6 +77,7 @@ const TicketsPackagePage: React.FC = observer(() => {
           ticketCount: selectedPackage.ticketCount,
           price: selectedPackage.price,
         });
+        toast.success("Пакет успешно создан");
       }
 
       // Перезагружаем список, закрываем диалог
@@ -77,7 +85,9 @@ const TicketsPackagePage: React.FC = observer(() => {
       setOpenDialog(false);
       setSelectedPackage(null);
     } catch (error) {
+      const serverError = error as ServerError;
       console.error("Ошибка при сохранении пакета:", error);
+      toast.error(serverError?.response?.data?.message || "Ошибка при сохранении пакета");
     }
   };
 
@@ -89,23 +99,27 @@ const TicketsPackagePage: React.FC = observer(() => {
     if (!selectedPackage) {
       setSelectedPackage({
         ...({} as RaffleTicketPackage),
-        [field]: field === "ticketCount" || field === "price"
-          ? Number(value)
-          : value,
+        [field]:
+          field === "ticketCount" || field === "price"
+            ? Number(value)
+            : value,
       });
     } else {
       setSelectedPackage({
         ...selectedPackage,
-        [field]: field === "ticketCount" || field === "price"
-          ? Number(value)
-          : value,
+        [field]:
+          field === "ticketCount" || field === "price"
+            ? Number(value)
+            : value,
       });
     }
   };
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Пакеты для розыгрышей (Raffle Tickets)</h1>
+      <h1 className="text-xl font-bold mb-4">
+        Пакеты для розыгрышей (Raffle Tickets)
+      </h1>
 
       {/* Кнопка "Добавить" */}
       <Button onClick={handleAddClick} className="mb-4">
@@ -168,7 +182,9 @@ const TicketsPackagePage: React.FC = observer(() => {
                 id="ticketCount"
                 type="number"
                 value={selectedPackage?.ticketCount ?? ""}
-                onChange={(e) => handleChangeField("ticketCount", e.target.value)}
+                onChange={(e) =>
+                  handleChangeField("ticketCount", e.target.value)
+                }
                 placeholder="Например: 10"
               />
             </div>

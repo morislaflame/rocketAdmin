@@ -1,4 +1,4 @@
-import { CreateProductDTO, CreateRaffleTicketPackageDTO, DailyReward, Raffle, RafflePrize, Task } from "@/types/types";
+import { CreateProductDTO, CreateRaffleTicketPackageDTO, DailyReward, Raffle, Task } from "@/types/types";
 import { $authHost } from "./index";
 
 // ====== DailyReward ======
@@ -89,15 +89,29 @@ export const getRaffleHistory = async () => {
 
 // ====== RafflePrize ======
 
-export const createPrize = async (prize: RafflePrize) => {
-    const { data } = await $authHost.post('api/raffle-prize', prize);
+export const getAllPrizes = async () => {
+    const { data } = await $authHost.get('api/raffle-prize');
     return data;
 }
 
-export const updatePrize = async (id: number, prize: RafflePrize) => {
-    const { data } = await $authHost.put(`api/raffle-prize/${id}`, prize);
+export const createRafflePrize = async (formData: FormData) => {
+    const { data } = await $authHost.post("api/raffle-prize", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return data;
-}
+  };
+  
+
+  export const updateRafflePrize = async (id: number, formData: FormData) => {
+    const { data } = await $authHost.put(`api/raffle-prize/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  };
 
 
 // ====== RaffleTicketPackage ======

@@ -26,12 +26,13 @@ import {
     setRafflePrize,
     getRaffleById,
     getRaffleHistory,
-    createPrize,
-    updatePrize,
+    getAllPrizes,
     createPackage,
     getAllPackages,
     updatePackage,
     getUserById,
+    createRafflePrize,
+    updateRafflePrize,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -125,6 +126,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting daily rewards:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
@@ -141,6 +143,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error creating daily reward:", error);
+            throw error;
         }
     }
 
@@ -155,6 +158,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error updating daily reward:", error);
+            throw error;
         }
     }
 
@@ -168,6 +172,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error creating task:", error);
+            throw error;
         }
     }
 
@@ -181,6 +186,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting tasks:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
@@ -199,6 +205,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error updating task:", error);
+            throw error;
         }
     }
 
@@ -212,6 +219,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error creating product:", error);
+            throw error;
         }
     }
 
@@ -225,6 +233,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting all products:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
@@ -243,6 +252,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error updating product:", error);
+            throw error;
         }
     }
 
@@ -256,6 +266,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error creating raffle:", error);
+            throw error;
         }
     }
 
@@ -269,6 +280,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting current raffle:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
@@ -288,6 +300,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error completing raffle:", error);
+            throw error;
         }
     }
 
@@ -302,6 +315,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error setting raffle prize:", error);
+            throw error;
         }
     }
 
@@ -311,6 +325,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting raffle by id:", error);
+            throw error;
         }
     }
 
@@ -324,29 +339,46 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting raffle history:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
+
             });
         }
     }
 
     // ====== RafflePrize ======
-    async createPrize(prize: RafflePrize) {
+
+    async getAllPrizes() {
         try {
-            const data = await createPrize(prize);
+            const data = await getAllPrizes();
+            runInAction(() => {
+                this.setPrizes(data);
+            });
+            return data;
+        } catch (error) {
+            console.error("Error getting all prizes:", error);
+            throw error;
+        }
+    }
+
+    async createPrize(prize: FormData) {
+        try {
+            const data = await createRafflePrize(prize);
             runInAction(() => {
                 this._prizes = [...this._prizes, data];
             });
             return data;
         } catch (error) {
             console.error("Error creating prize:", error);
+            throw error;
         }
     }
 
-    async updatePrize(id: number, prize: RafflePrize) {
+    async updatePrize(id: number, formData: FormData) {
         try {
-            const data = await updatePrize(id, prize);
+            const data = await updateRafflePrize(id, formData);
             runInAction(() => {
                 this._prizes = this._prizes.map(p => 
                     p.id === id ? data : p
@@ -355,6 +387,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error updating prize:", error);
+            throw error;
         }
     }
 
@@ -368,6 +401,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error creating package:", error);
+            throw error;
         }
     }
 
@@ -381,6 +415,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting all packages:", error);
+            throw error;
         } finally {
             runInAction(() => {
                 this.setLoading(false);
@@ -399,6 +434,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error updating package:", error);
+            throw error;
         }
     }
 
@@ -409,6 +445,7 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error getting user by id:", error);
+            throw error;
         }
     }
 }

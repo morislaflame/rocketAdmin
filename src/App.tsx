@@ -5,6 +5,10 @@ import { Context, IStoreContext } from "./store/StoreProvider";
 import "./App.css";
 import LoadingIndicator from "./components/ui/LoadingIndicator";
 import Navigation from "./components/MainComponents/Navigation";
+import { Toaster } from "@/components/ui/sonner"
+
+
+
 
 // Lazy-loaded Components
 
@@ -57,6 +61,7 @@ const App = observer(() => {
       >
         <AppRouter />
       </Suspense>
+      <Toaster />
     </BrowserRouter>
   );
 });

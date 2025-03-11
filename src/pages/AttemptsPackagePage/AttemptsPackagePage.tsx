@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Context, IStoreContext } from "@/store/StoreProvider";
 
-// Компоненты из shadcn/ui
+// Компоненты shadcn/ui
 import {
   Table,
   TableBody,
@@ -25,8 +25,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-// Импортируем ваш интерфейс Product
-import { Product } from "@/types/types";
+// Импортируем типы
+import { Product, ServerError } from "@/types/types";
+// Импортируем toast
+import { toast } from "sonner";
 
 const AttemptsPackagePage: React.FC = observer(() => {
   const { admin } = useContext(Context) as IStoreContext;
@@ -34,24 +36,30 @@ const AttemptsPackagePage: React.FC = observer(() => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // При первом монтировании загружаем продукты (у которых есть attempts и starsPrice)
+  // При первом монтировании загружаем продукты
   useEffect(() => {
-    admin.getAllProducts();
+    admin
+      .getAllProducts()
+      .catch((err) => {
+        const serverError = err as ServerError;
+        console.error("Ошибка при загрузке продуктов:", err);
+        toast.error(serverError?.response?.data?.message || "Ошибка при загрузке продуктов");
+      });
   }, [admin]);
 
-  // Нажатие "Добавить пакет"
+  // "Добавить пакет"
   const handleAddClick = () => {
-    setSelectedProduct(null); // чтобы форма открылась пустая
+    setSelectedProduct(null);
     setOpenDialog(true);
   };
 
-  // Нажатие "Изменить" (в строке таблицы)
+  // "Изменить"
   const handleEditClick = (prod: Product) => {
     setSelectedProduct(prod);
     setOpenDialog(true);
   };
 
-  // Сохранение нового или изменённого продукта
+  // Сохранение (добавление или редактирование)
   const handleSave = async () => {
     if (!selectedProduct) return;
 
@@ -63,6 +71,7 @@ const AttemptsPackagePage: React.FC = observer(() => {
           attempts: selectedProduct.attempts,
           starsPrice: selectedProduct.starsPrice,
         });
+        toast.success("Пакет успешно обновлён");
       } else {
         // Создаём продукт
         await admin.createProduct({
@@ -70,6 +79,7 @@ const AttemptsPackagePage: React.FC = observer(() => {
           attempts: selectedProduct.attempts,
           starsPrice: selectedProduct.starsPrice,
         });
+        toast.success("Пакет успешно создан");
       }
 
       // Обновим список, закроем диалог
@@ -77,13 +87,14 @@ const AttemptsPackagePage: React.FC = observer(() => {
       setOpenDialog(false);
       setSelectedProduct(null);
     } catch (error) {
+      const serverError = error as ServerError;
       console.error("Ошибка при сохранении продукта:", error);
+      toast.error(serverError?.response?.data?.message || "Ошибка при сохранении продукта");
     }
   };
 
-  // Изменение полей формы
+  // Изменение полей
   const handleChangeField = (field: keyof Product, value: string) => {
-    // Если selectedProduct = null, создаём объект с указанным полем
     if (!selectedProduct) {
       setSelectedProduct({
         ...({} as Product),
@@ -101,12 +112,12 @@ const AttemptsPackagePage: React.FC = observer(() => {
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Пакеты попыток за Stars</h1>
 
-      {/* Кнопка "Добавить" */}
+      {/* Кнопка "Добавить пакет" */}
       <Button onClick={handleAddClick} className="mb-4">
         Добавить пакет
       </Button>
 
-      {/* Таблица с продуктами (пакетами) */}
+      {/* Таблица */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -134,12 +145,12 @@ const AttemptsPackagePage: React.FC = observer(() => {
         </TableBody>
       </Table>
 
-      {/* Диалог добавления / редактирования */}
+      {/* Диалог */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedProduct?.id ? "Редактировать продукт" : "Добавить продукт"}
+              {selectedProduct?.id ? "Редактировать пакет" : "Добавить пакет"}
             </DialogTitle>
             <DialogDescription>
               Заполните поля ниже и нажмите «Сохранить».
@@ -147,6 +158,7 @@ const AttemptsPackagePage: React.FC = observer(() => {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {/* name */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="name">Название</Label>
               <Input
@@ -156,6 +168,7 @@ const AttemptsPackagePage: React.FC = observer(() => {
                 placeholder="Название продукта"
               />
             </div>
+            {/* attempts */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="attempts">Количество попыток</Label>
               <Input
@@ -166,6 +179,7 @@ const AttemptsPackagePage: React.FC = observer(() => {
                 placeholder="Например: 10"
               />
             </div>
+            {/* starsPrice */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="starsPrice">Цена (звёзд)</Label>
               <Input
