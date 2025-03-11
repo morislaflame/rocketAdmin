@@ -12,6 +12,11 @@ export interface UserInfo {
     tickets: number;
     referralCode: string | null;
     referrerId: number | null;
+    totalSpent: string;
+    dailyRewardAvailable: boolean;
+    dailyRewardDay: number;
+    lastDailyRewardClaimAt: string;
+    participatesInRaffle: boolean;
     // Если нужно, можно добавить другие поля
   }
 

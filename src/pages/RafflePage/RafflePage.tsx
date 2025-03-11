@@ -49,7 +49,7 @@ const RafflePage: React.FC = observer(() => {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // --- Состояния для кнопок ---
-  const [isCompletingRaffle, setIsCompletingRaffle] = useState(false);
+//   const [isCompletingRaffle, setIsCompletingRaffle] = useState(false);
   const [isSavingPrize, setIsSavingPrize] = useState(false);
   const [assigningPrizeId, setAssigningPrizeId] = useState<number | null>(null);
 
@@ -70,19 +70,19 @@ const RafflePage: React.FC = observer(() => {
   const hasActiveRaffle = currentRaffle && !("message" in currentRaffle);
 
   // --- Завершить розыгрыш ---
-  const handleCompleteRaffle = async () => {
-    try {
-      setIsCompletingRaffle(true);
-      await admin.completeRaffle();
-      toast.success("Розыгрыш завершён");
-    } catch (error) {
-      const serverError = error as ServerError;
-      console.error("Ошибка при завершении розыгрыша:", error);
-      toast.error(serverError?.response?.data?.message || "Ошибка при завершении розыгрыша");
-    } finally {
-      setIsCompletingRaffle(false);
-    }
-  };
+//   const handleCompleteRaffle = async () => {
+//     try {
+//       setIsCompletingRaffle(true);
+//       await admin.completeRaffle();
+//       toast.success("Розыгрыш завершён");
+//     } catch (error) {
+//       const serverError = error as ServerError;
+//       console.error("Ошибка при завершении розыгрыша:", error);
+//       toast.error(serverError?.response?.data?.message || "Ошибка при завершении розыгрыша");
+//     } finally {
+//       setIsCompletingRaffle(false);
+//     }
+//   };
 
   // --- Назначить приз для текущего розыгрыша ---
   const handleSetPrize = async (prizeId: number) => {
@@ -200,14 +200,14 @@ const RafflePage: React.FC = observer(() => {
                 ? currentRaffle.raffle.raffle_prize.name
                 : "Не назначен"}
             </p>
-            <Button
+            {/* <Button
               className="mt-2"
               variant="outline"
               onClick={handleCompleteRaffle}
               disabled={isCompletingRaffle}
             >
               {isCompletingRaffle ? "Завершаем..." : "Завершить розыгрыш"}
-            </Button>
+            </Button> */}
           </div>
         ) : (
           <p className="mt-2">Сейчас нет активного розыгрыша.</p>

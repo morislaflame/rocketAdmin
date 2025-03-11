@@ -33,6 +33,7 @@ import {
     getUserById,
     createRafflePrize,
     updateRafflePrize,
+    searchUser,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -329,24 +330,24 @@ export default class AdminStore {
         }
     }
 
-    async getRaffleHistory() {
+    async getRaffleHistory(limit: number, offset: number) {
         this.setLoading(true);
         try {
-            const data = await getRaffleHistory();
-            runInAction(() => {
-                this.setRaffleHistory(data);
-            });
-            return data;
+          const data = await getRaffleHistory(limit, offset);
+          runInAction(() => {
+            this.setRaffleHistory(data);
+          });
+          return data;
         } catch (error) {
-            console.error("Error getting raffle history:", error);
-            throw error;
+          console.error("Error getting raffle history:", error);
+          throw error;
         } finally {
-            runInAction(() => {
-                this.setLoading(false);
-
-            });
+          runInAction(() => {
+            this.setLoading(false);
+          });
         }
-    }
+      }
+      
 
     // ====== RafflePrize ======
 
@@ -448,4 +449,15 @@ export default class AdminStore {
             throw error;
         }
     }
+
+    async searchUser(params: { userId?: string; telegramId?: string; username?: string }) {
+        try {
+          const data = await searchUser(params);
+          return data;
+        } catch (error) {
+          console.error("Error searching user:", error);
+          throw error;
+        }
+      }
+      
 }

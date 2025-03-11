@@ -81,10 +81,13 @@ export const getRaffleById = async (id: number) => {
     return data;
 }
 
-export const getRaffleHistory = async () => {
-    const { data } = await $authHost.get('api/raffle/history');
+export const getRaffleHistory = async (limit: number, offset: number) => {
+    const { data } = await $authHost.get('api/raffle/history', {
+      params: { limit, offset },
+    });
     return data;
-}
+  };
+  
 
 
 // ====== RafflePrize ======
@@ -138,6 +141,12 @@ export const getUserById = async (id: number) => {
     const { data } = await $authHost.get(`api/user/${id}`);
     return data;
 }
+
+export const searchUser = async (params: { userId?: string; telegramId?: string; username?: string }) => {
+    const { data } = await $authHost.get("api/user/search", { params });
+    return data;
+  };
+  
 
 
 
