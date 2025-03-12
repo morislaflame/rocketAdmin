@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, lazy, Suspense } from "react";
+import { useContext, useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { Context, IStoreContext } from "./store/StoreProvider";
