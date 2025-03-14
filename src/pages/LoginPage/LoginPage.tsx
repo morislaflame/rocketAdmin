@@ -25,6 +25,7 @@ const LoginPage: React.FC = () => {
             console.log("User data:", userData);
             user.setIsAuth(true);
             navigate(ADMIN_ROUTE);
+            window.location.reload();
         } catch (e) {
             setError((e as ServerError).response?.data?.message || "Произошла ошибка при входе");
         }

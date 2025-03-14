@@ -9,4 +9,4 @@ export const TICKETS_PACKAGE_ROUTE = '/admin/tickets-package';
 export const RAFFLE_ROUTE = '/admin/raffle';
 export const USERS_ROUTE = '/admin/users';
 export const ALL_RAFFLES_ROUTE = '/admin/all-raffles';
-
+export const REQUESTED_PRIZES_ROUTE = '/admin/requested-prizes';

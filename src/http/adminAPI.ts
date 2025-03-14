@@ -148,6 +148,19 @@ export const searchUser = async (params: { userId?: string; telegramId?: string;
   };
   
 
+// ====== UserPrize ======
+export const getRequestedPrizes = async (limit = 20, offset = 0) => {
+    const { data } = await $authHost.get('api/user-prize/requested', {
+        params: { limit, offset }
+    });
+    return data;
+};
+
+export const confirmPrizeDelivery = async (prizeId: number) => {
+    const { data } = await $authHost.post(`api/user-prize/confirm/${prizeId}`);
+    return data;
+};
+
 
 
 

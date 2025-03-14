@@ -2,7 +2,7 @@
 import LoginPage from './pages/LoginPage/LoginPage';
 import NotAdminPage from './pages/NotAdminPage/NotAdminPage';
 import AdminPage from './pages/AdminPage/AdminPage';
-import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, ALL_RAFFLES_ROUTE } from './utils/consts';
+import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, ALL_RAFFLES_ROUTE, REQUESTED_PRIZES_ROUTE } from './utils/consts';
 import { IRoute, UserInfo } from './types/types';
 import AttemptsPackagePage from './pages/AttemptsPackagePage/AttemptsPackagePage';
 import RafflePage from './pages/RafflePage/RafflePage';
@@ -11,6 +11,7 @@ import TasksPage from './pages/TasksPage/TasksPage';
 import TicketsPackagePage from './pages/TicketsPackagePage/TicketsPackagePage';
 import UsersPage from './pages/UsersPage/UsersPage';
 import AllRafflesPage from './pages/AllRafflesPage/AllRafflesPage';
+import RequestedPrizesPage from './pages/RequestedPrizesPage';
 
 export const authRoutes = (user: UserInfo | null) => {
     console.log("User in authRoutes:", user);
@@ -60,8 +61,10 @@ export const authRoutes = (user: UserInfo | null) => {
             path: ALL_RAFFLES_ROUTE,
             Component: AllRafflesPage
         });
-
-
+        routes.push({
+            path: REQUESTED_PRIZES_ROUTE,
+            Component: RequestedPrizesPage
+        });
     } else {
         console.log("User is not admin");
     }

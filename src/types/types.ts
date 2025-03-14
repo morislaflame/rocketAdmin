@@ -126,7 +126,41 @@ export type CreateProductDTO = Omit<Product, "id">;
     id: number;
     raffleId: number;
     status: string;
-    winDate: Date;
+    winDate: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: number;
+    rafflePrizeId: number | null;
+    raffle: {
+      id: number;
+      status: string;
+      startTime: string;
+      endTime: string;
+      prize: string;
+      winnerUserId: number;
+      totalTickets: number;
+      winningTicketNumber: number;
+      thresholdReachedAt: string;
+      timerActive: boolean;
+      winnerChance: number;
+      createdAt: string;
+      updatedAt: string;
+      prizeId: number;
+      rafflePrizeId: number | null;
+      raffle_prize: {
+        id: number;
+        name: string;
+        imageUrl: string;
+        value: number;
+        description: string;
+      }
+      },
+      user: {
+        id: number;
+        username: string;
+        telegramId: string;
+        email: string | null;
+      }
   }
   
   export interface UserBonus {
@@ -150,4 +184,5 @@ export type CreateProductDTO = Omit<Product, "id">;
     entityId: number | null;
     createdAt: Date;
   }
+  
   

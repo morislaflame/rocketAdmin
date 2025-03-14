@@ -9,6 +9,7 @@ import {
     CurrentRaffle,
     CreateProductDTO,
     CreateRaffleTicketPackageDTO,
+    UserPrize,
 } from "@/types/types";
 import {
     getDailyRewards,
@@ -34,6 +35,8 @@ import {
     createRafflePrize,
     updateRafflePrize,
     searchUser,
+    getRequestedPrizes,
+    confirmPrizeDelivery,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -45,6 +48,7 @@ export default class AdminStore {
     _raffleHistory: Raffle[] = [];
     _prizes: RafflePrize[] = [];
     _packages: RaffleTicketPackage[] = [];
+    _requestedPrizes: UserPrize[] = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -83,6 +87,10 @@ export default class AdminStore {
         this._packages = packages;
     }
 
+    setRequestedPrizes(prizes: UserPrize[]) {
+        this._requestedPrizes = prizes;
+    }
+
     // Getters
     get loading() {
         return this._loading;
@@ -114,6 +122,10 @@ export default class AdminStore {
 
     get packages() {
         return this._packages;
+    }
+
+    get requestedPrizes() {
+        return this._requestedPrizes;
     }
 
     // ====== DailyReward ======
@@ -460,4 +472,38 @@ export default class AdminStore {
         }
       }
       
+    // ====== UserPrize ======
+    async getRequestedPrizes(limit = 20, offset = 0) {
+        this.setLoading(true);
+        try {
+            const data = await getRequestedPrizes(limit, offset);
+            runInAction(() => {
+                this.setRequestedPrizes(data);
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при получении запрошенных призов:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
+        }
+    }
+
+    async confirmPrizeDelivery(prizeId: number) {
+        try {
+            const data = await confirmPrizeDelivery(prizeId);
+            runInAction(() => {
+                // Удаляем подтвержденный приз из списка запрошенных
+                this._requestedPrizes = this._requestedPrizes.filter(
+                    prize => prize.id !== prizeId
+                );
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при подтверждении доставки приза:", error);
+            throw error;
+        }
+    }
 }
