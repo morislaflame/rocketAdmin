@@ -25,14 +25,14 @@ export const authRoutes = (user: UserInfo | null) => {
             path: NOT_FOUND_ROUTE,
             Component: NotAdminPage
         },
+        {
+            path: ADMIN_ROUTE,
+            Component: AdminPage
+        },
     ];
     
     if (user && user.role === 'ADMIN') {
         console.log("User is admin, adding admin route");
-        routes.push({
-            path: ADMIN_ROUTE,
-            Component: AdminPage
-        });
         routes.push({
             path: TASKS_ROUTE,
             Component: TasksPage
