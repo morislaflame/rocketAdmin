@@ -37,6 +37,7 @@ import {
     searchUser,
     getRequestedPrizes,
     confirmPrizeDelivery,
+    updateRaffleSettings,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -328,6 +329,22 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Error setting raffle prize:", error);
+            throw error;
+        }
+    }
+
+    async updateRaffleSettings(settings: { ticketThreshold?: number; raffleDuration?: number }) {
+        try {
+            const data = await updateRaffleSettings(settings);
+            runInAction(() => {
+                if (this._currentRaffle && data.raffle) {
+                    this._currentRaffle.raffle.ticketThreshold = data.raffle.ticketThreshold;
+                    this._currentRaffle.raffle.raffleDuration = data.raffle.raffleDuration;
+                }
+            });
+            return data;
+        } catch (error) {
+            console.error("Error updating raffle settings:", error);
             throw error;
         }
     }

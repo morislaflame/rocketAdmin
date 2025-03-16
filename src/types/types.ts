@@ -17,8 +17,24 @@ export interface UserInfo {
     dailyRewardDay: number;
     lastDailyRewardClaimAt: string;
     participatesInRaffle: boolean;
+    Referrals: Referral[];
+    referralsCount: number;
     // Если нужно, можно добавить другие поля
   }
+
+  export interface Referral {
+    id: number;
+    referrerId: number;
+    referralId: number;
+    registeredAt: string;
+    createdAt: string;
+    updatedAt: string;
+    ReferralUser: {
+        id: number;
+        totalSpent: string;
+    };
+  }
+  
 
   // types.ts
 export interface IRoute {
@@ -78,6 +94,8 @@ export type CreateProductDTO = Omit<Product, "id">;
     winnerChance: number | null;
     timerActive: boolean;
     winningTicketNumber: number | null;
+    ticketThreshold: number;
+    raffleDuration: number;
     winner: {
       id: number;
       username: string | null;

@@ -7,6 +7,8 @@ import { Context, IStoreContext } from "@/store/StoreProvider";
 import { ServerError, UserInfo } from "@/types/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Copy } from "lucide-react";
 
 
 const UsersPage: React.FC = observer(() => {
@@ -16,6 +18,7 @@ const UsersPage: React.FC = observer(() => {
   const [username, setUsername] = useState("");
   const [foundUser, setFoundUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isReferralsOpen, setIsReferralsOpen] = useState(false);
 
   const handleSearch = async () => {
     // Проверяем, что ровно одно поле заполнено
@@ -47,6 +50,17 @@ const UsersPage: React.FC = observer(() => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Скопировано в буфер обмена");
+  };
+
+  const calculateTotalReferralsSpent = () => {
+    if (!foundUser?.Referrals) return 0;
+    return foundUser.Referrals.reduce((sum, referral) => 
+      sum + parseFloat(referral.ReferralUser.totalSpent || "0"), 0);
   };
 
   return (
@@ -118,9 +132,57 @@ const UsersPage: React.FC = observer(() => {
           <p>
             <strong>Тон-адрес:</strong> {foundUser.tonAddress}
           </p>
-          
+          <p>
+            <strong>Количество рефералов:</strong>{" "}
+            <Button 
+              variant="secondary" 
+              className=" h-auto" 
+              onClick={() => setIsReferralsOpen(true)}
+            >
+              {foundUser.referralsCount || 0}
+            </Button>
+          </p>
+          <p>
+            <strong>Общий расход TON рефералами:</strong>{" "}
+            {calculateTotalReferralsSpent().toFixed(9)}
+          </p>
         </div>
       )}
+
+      <Dialog open={isReferralsOpen && !!foundUser} onOpenChange={setIsReferralsOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Список рефералов</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            {foundUser?.Referrals && foundUser.Referrals.length > 0 ? (
+              <div className="grid gap-2">
+                {foundUser.Referrals.map((referral) => (
+                  <div key={referral.id} className="p-3 border rounded flex justify-between items-center">
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <p><strong>ID:</strong> {referral.ReferralUser.id}</p>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6" 
+                          onClick={() => copyToClipboard(referral.ReferralUser.id.toString())}
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                      <p><strong>Потрачено TON:</strong> {parseFloat(referral.ReferralUser.totalSpent || "0").toFixed(9)}</p>
+                      <p><strong>Зарегистрирован:</strong> {new Date(referral.registeredAt).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Нет рефералов</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

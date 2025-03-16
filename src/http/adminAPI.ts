@@ -161,6 +161,12 @@ export const confirmPrizeDelivery = async (prizeId: number) => {
     return data;
 };
 
+// Новый метод для обновления настроек розыгрыша
+export const updateRaffleSettings = async (settings: { ticketThreshold?: number; raffleDuration?: number }) => {
+    const { data } = await $authHost.post(`api/raffle/update-settings`, settings);
+    return data;
+}
+
 
 
 

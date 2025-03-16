@@ -53,12 +53,25 @@ const RafflePage: React.FC = observer(() => {
   const [isSavingPrize, setIsSavingPrize] = useState(false);
   const [assigningPrizeId, setAssigningPrizeId] = useState<number | null>(null);
 
+  // --- Новые состояния для настроек розыгрыша ---
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [ticketThreshold, setTicketThreshold] = useState<number>(50);
+  const [raffleDuration, setRaffleDuration] = useState<number>(240); // 4 часа в минутах
+  const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
   // Загружаем розыгрыш и призы при монтировании
   useEffect(() => {
-    admin.getCurrentRaffle().catch((err) => {
+    admin.getCurrentRaffle().then(raffle => {
+      // Если есть активный розыгрыш, инициализируем состояния его настройками
+      if (raffle && !("message" in raffle)) {
+        setTicketThreshold(raffle.raffle.ticketThreshold || 50);
+        setRaffleDuration((raffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000)); // переводим мс в минуты
+      }
+    }).catch((err) => {
       console.error(err);
       toast.error("Ошибка при загрузке текущего розыгрыша");
     });
+    
     admin.getAllPrizes().catch((err) => {
       console.error(err);
       toast.error("Ошибка при загрузке призов");
@@ -182,6 +195,47 @@ const RafflePage: React.FC = observer(() => {
     }
   };
 
+  // --- Открыть диалог настроек розыгрыша ---
+  const handleOpenSettings = () => {
+    // Загружаем текущие настройки из активного розыгрыша, если они есть
+    if (currentRaffle && !("message" in currentRaffle)) {
+      setTicketThreshold(currentRaffle.raffle.ticketThreshold || 50);
+      setRaffleDuration((currentRaffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000)); // переводим мс в минуты
+    }
+    setSettingsDialogOpen(true);
+  };
+
+  // --- Сохранить настройки розыгрыша ---
+  const handleSaveSettings = async () => {
+    try {
+      setIsUpdatingSettings(true);
+      
+      // Валидация
+      if (ticketThreshold <= 0) {
+        toast.error("Пороговое значение билетов должно быть положительным");
+        return;
+      }
+      if (raffleDuration <= 0) {
+        toast.error("Продолжительность розыгрыша должна быть положительной");
+        return;
+      }
+      
+      await admin.updateRaffleSettings({
+        ticketThreshold,
+        raffleDuration // API ожидает минуты, которые автоматически конвертирует в мс
+      });
+      
+      toast.success("Настройки розыгрыша обновлены");
+      setSettingsDialogOpen(false);
+    } catch (error) {
+      const serverError = error as ServerError;
+      console.error("Ошибка при обновлении настроек розыгрыша:", error);
+      toast.error(serverError?.response?.data?.message || "Ошибка при обновлении настроек розыгрыша");
+    } finally {
+      setIsUpdatingSettings(false);
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Управление розыгрышем</h1>
@@ -200,14 +254,19 @@ const RafflePage: React.FC = observer(() => {
                 ? currentRaffle.raffle.raffle_prize.name
                 : "Не назначен"}
             </p>
-            {/* <Button
-              className="mt-2"
-              variant="outline"
-              onClick={handleCompleteRaffle}
-              disabled={isCompletingRaffle}
-            >
-              {isCompletingRaffle ? "Завершаем..." : "Завершить розыгрыш"}
-            </Button> */}
+            {/* Добавляем отображение настраиваемых параметров */}
+            <p>Минимум билетов для таймера: {currentRaffle.raffle.ticketThreshold || 50}</p>
+            <p>Продолжительность: {((currentRaffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000))} минут</p>
+            
+            <div className="mt-2 flex gap-2">
+              {/* Кнопка для открытия диалога настроек */}
+              <Button 
+                variant="outline" 
+                onClick={handleOpenSettings}
+              >
+                Изменить настройки
+              </Button>
+            </div>
           </div>
         ) : (
           <p className="mt-2">Сейчас нет активного розыгрыша.</p>
@@ -338,6 +397,64 @@ const RafflePage: React.FC = observer(() => {
                 : editPrizeId
                 ? "Обновить"
                 : "Создать"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Диалог настроек розыгрыша */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Настройки розыгрыша</DialogTitle>
+            <DialogDescription>
+              Укажите минимальное количество билетов для активации таймера и продолжительность розыгрыша.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="ticketThreshold" className="text-right">
+                Минимум билетов
+              </Label>
+              <Input
+                id="ticketThreshold"
+                type="number"
+                min="1"
+                value={ticketThreshold}
+                onChange={(e) => setTicketThreshold(parseInt(e.target.value) || 1)}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="raffleDuration" className="text-right">
+                Время (мин)
+              </Label>
+              <Input
+                id="raffleDuration"
+                type="number"
+                min="1"
+                value={raffleDuration}
+                onChange={(e) => setRaffleDuration(parseInt(e.target.value) || 1)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setSettingsDialogOpen(false)}
+            >
+              Отмена
+            </Button>
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={isUpdatingSettings}
+            >
+              {isUpdatingSettings ? "Сохранение..." : "Сохранить"}
             </Button>
           </DialogFooter>
         </DialogContent>
