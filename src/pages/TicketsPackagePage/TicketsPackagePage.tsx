@@ -57,26 +57,51 @@ const TicketsPackagePage: React.FC = observer(() => {
     setOpenDialog(true);
   };
 
+  // Меняем поля формы
+  const handleChangeField = (
+    field: keyof RaffleTicketPackage,
+    value: string
+  ) => {
+    if (!selectedPackage) {
+      setSelectedPackage({
+        ...({} as RaffleTicketPackage),
+        [field]:
+          field === "ticketCount" ? Number(value) :
+          field === "price" ? value : // Оставляем строкой при вводе
+          value,
+      });
+    } else {
+      setSelectedPackage({
+        ...selectedPackage,
+        [field]:
+          field === "ticketCount" ? Number(value) :
+          field === "price" ? value : // Оставляем строкой при вводе
+          value,
+      });
+    }
+  };
+
   // Сохранение пакета (нового или обновлённого)
   const handleSave = async () => {
     if (!selectedPackage) return;
 
     try {
+      // Преобразуем price в число перед отправкой на сервер
+      const packageData = {
+        name: selectedPackage.name,
+        ticketCount: selectedPackage.ticketCount,
+        price: typeof selectedPackage.price === 'string' 
+          ? Number(selectedPackage.price) 
+          : selectedPackage.price,
+      };
+
       if (selectedPackage.id) {
         // Редактируем
-        await admin.updatePackage(selectedPackage.id, {
-          name: selectedPackage.name,
-          ticketCount: selectedPackage.ticketCount,
-          price: selectedPackage.price,
-        });
+        await admin.updatePackage(selectedPackage.id, packageData);
         toast.success("Пакет успешно обновлён");
       } else {
         // Создаём
-        await admin.createPackage({
-          name: selectedPackage.name,
-          ticketCount: selectedPackage.ticketCount,
-          price: selectedPackage.price,
-        });
+        await admin.createPackage(packageData);
         toast.success("Пакет успешно создан");
       }
 
@@ -88,30 +113,6 @@ const TicketsPackagePage: React.FC = observer(() => {
       const serverError = error as ServerError;
       console.error("Ошибка при сохранении пакета:", error);
       toast.error(serverError?.response?.data?.message || "Ошибка при сохранении пакета");
-    }
-  };
-
-  // Меняем поля формы
-  const handleChangeField = (
-    field: keyof RaffleTicketPackage,
-    value: string
-  ) => {
-    if (!selectedPackage) {
-      setSelectedPackage({
-        ...({} as RaffleTicketPackage),
-        [field]:
-          field === "ticketCount" || field === "price"
-            ? Number(value)
-            : value,
-      });
-    } else {
-      setSelectedPackage({
-        ...selectedPackage,
-        [field]:
-          field === "ticketCount" || field === "price"
-            ? Number(value)
-            : value,
-      });
     }
   };
 
@@ -192,6 +193,7 @@ const TicketsPackagePage: React.FC = observer(() => {
               <Label htmlFor="price">Цена (price)</Label>
               <Input
                 id="price"
+                type="text"
                 value={selectedPackage?.price ?? ""}
                 onChange={(e) => handleChangeField("price", e.target.value)}
                 placeholder="Например: 3.5"
