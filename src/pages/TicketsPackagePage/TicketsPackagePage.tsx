@@ -192,7 +192,6 @@ const TicketsPackagePage: React.FC = observer(() => {
               <Label htmlFor="price">Цена (price)</Label>
               <Input
                 id="price"
-                type="number"
                 value={selectedPackage?.price ?? ""}
                 onChange={(e) => handleChangeField("price", e.target.value)}
                 placeholder="Например: 3.5"
