@@ -9,7 +9,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE } from "@/utils/consts"
+import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, LEADERBOARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE } from "@/utils/consts"
 
 const taskComponents = [
     {
@@ -28,12 +28,17 @@ const raffleComponents = [
     {
         title: "Текущий розыгрыш",
         href: RAFFLE_ROUTE,
-        description: "Управление текущими и прошедшими розыгрышами призов."
+        description: "Управление текущим розыгрышем и призами."
     },
     {
         title: "Все розыгрыши",
         href: ALL_RAFFLES_ROUTE,
         description: "Просмотр всех розыгрышей."
+    },
+    {
+        title: "Лидерборд",
+        href: LEADERBOARD_ROUTE,
+        description: "Настройка лидерборда и призов для топ-пользователей."
     }
 ]
 

@@ -13,6 +13,7 @@ export interface UserInfo {
     referralCode: string | null;
     referrerId: number | null;
     totalSpent: string;
+    imageUrl: string | null;
     dailyRewardAvailable: boolean;
     dailyRewardDay: number;
     lastDailyRewardClaimAt: string;
@@ -189,6 +190,34 @@ export type CreateProductDTO = Omit<Product, "id">;
     createdAt: Date;
     usedAt: Date | null;
   }
+
+
+export interface LeaderboardPlacePrize {
+  id: number;
+  place: number;
+  moneyAmount: number | null;
+  rafflePrizeId: number | null;
+  leaderboardSettingsId: number;
+  createdAt?: string;
+  updatedAt?: string;
+  rafflePrize?: RafflePrize;
+}
+
+export interface LeaderboardSettings {
+  id: number;
+  isActive: boolean;
+  endDate: string | null;
+  prizeType: 'money' | 'physical';
+  totalMoneyPool: number | null;
+  createdAt: string;
+  updatedAt: string;
+  placePrizes: LeaderboardPlacePrize[];
+}
+
+export interface LeaderboardData {
+  users: UserInfo[];
+  settings: LeaderboardSettings | { isActive: false };
+}
 
   export interface MediaFile {
     id: number;

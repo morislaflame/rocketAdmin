@@ -38,6 +38,9 @@ import {
     getRequestedPrizes,
     confirmPrizeDelivery,
     updateRaffleSettings,
+    getLeaderboard,
+    getLeaderboardSettings,
+    updateLeaderboardSettings,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -521,6 +524,57 @@ export default class AdminStore {
         } catch (error) {
             console.error("Ошибка при подтверждении доставки приза:", error);
             throw error;
+        }
+    }
+
+    // ====== Leaderboard ======
+    async getLeaderboard() {
+        this.setLoading(true);
+        try {
+            const data = await getLeaderboard();
+            return data;
+        } catch (error) {
+            console.error("Error getting leaderboard:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
+        }
+    }
+
+    async getLeaderboardSettings() {
+        this.setLoading(true);
+        try {
+            const data = await getLeaderboardSettings();
+            return data;
+        } catch (error) {
+            console.error("Error getting leaderboard settings:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
+        }
+    }
+
+    async updateLeaderboardSettings(settings: {
+        endDate?: Date | string | null;
+        prizeType: 'money' | 'physical';
+        totalMoneyPool?: number;
+        placePrizes: Record<string, { moneyAmount?: number; rafflePrizeId?: number }>
+    }) {
+        this.setLoading(true);
+        try {
+            const data = await updateLeaderboardSettings(settings);
+            return data;
+        } catch (error) {
+            console.error("Error updating leaderboard settings:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
         }
     }
 }

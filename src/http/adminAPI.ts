@@ -167,6 +167,28 @@ export const updateRaffleSettings = async (settings: { ticketThreshold?: number;
     return data;
 }
 
+// ====== Leaderboard ======
+
+export const getLeaderboard = async () => {
+    const { data } = await $authHost.get('api/leaderboard');
+    return data;
+};
+
+export const getLeaderboardSettings = async () => {
+    const { data } = await $authHost.get('api/leaderboard/settings');
+    return data;
+};
+
+export const updateLeaderboardSettings = async (settings: {
+    endDate?: Date | string | null;
+    prizeType: 'money' | 'physical';
+    totalMoneyPool?: number;
+    placePrizes: Record<string, { moneyAmount?: number; rafflePrizeId?: number }>
+}) => {
+    const { data } = await $authHost.post('api/leaderboard/settings', settings);
+    return data;
+};
+
 
 
 
