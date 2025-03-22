@@ -31,7 +31,7 @@ import { toast } from "sonner";
 // Типы
 import { ServerError, RafflePrize } from "@/types/types";
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 
 const RafflePage: React.FC = observer(() => {
   const { admin } = useContext(Context) as IStoreContext;
@@ -140,7 +140,7 @@ const RafflePage: React.FC = observer(() => {
       const file = e.target.files[0];
       // Проверка размера
       if (file.size > MAX_FILE_SIZE) {
-        toast.error("Максимальный размер файла: 15MB");
+        toast.error("Максимальный размер файла: 25MB");
         return;
       }
       setImageFile(file);
@@ -344,7 +344,7 @@ const RafflePage: React.FC = observer(() => {
           <DialogHeader>
             <DialogTitle>{editPrizeId ? "Редактировать приз" : "Создать приз"}</DialogTitle>
             <DialogDescription>
-              Заполните поля и при необходимости загрузите новый файл изображения (до 15MB)
+              Заполните поля и при необходимости загрузите новый файл изображения (до 25MB)
             </DialogDescription>
           </DialogHeader>
 
@@ -375,7 +375,7 @@ const RafflePage: React.FC = observer(() => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Изображение (до 15MB)</Label>
+              <Label>Изображение (до 25 MB)</Label>
               <Input type="file" accept="image/*" onChange={handleFileChange} />
               {imageFile && (
                 <p style={{ fontSize: "12px", wordBreak: "break-all" }}>
