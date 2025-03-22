@@ -3,6 +3,7 @@
 import React, { useContext, useEffect, useState, ChangeEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { Context, IStoreContext } from "@/store/StoreProvider";
+import Lottie from "lottie-react";
 
 // Компоненты из shadcn/ui
 import {
@@ -36,36 +37,33 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const RafflePage: React.FC = observer(() => {
   const { admin } = useContext(Context) as IStoreContext;
 
-  // --- Состояния для диалога ---
+  // Состояния для диалога
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  // Если editPrizeId == null → создаём новый приз,
-  // иначе редактируем существующий.
   const [editPrizeId, setEditPrizeId] = useState<number | null>(null);
-
   const [prizeName, setPrizeName] = useState("");
   const [prizeValue, setPrizeValue] = useState<number>(0);
   const [prizeDescription, setPrizeDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // --- Состояния для кнопок ---
-//   const [isCompletingRaffle, setIsCompletingRaffle] = useState(false);
+  // Состояния для кнопок
   const [isSavingPrize, setIsSavingPrize] = useState(false);
   const [assigningPrizeId, setAssigningPrizeId] = useState<number | null>(null);
 
-  // --- Новые состояния для настроек розыгрыша ---
+  // Состояния для настроек розыгрыша
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [ticketThreshold, setTicketThreshold] = useState<number>(50);
-  const [raffleDuration, setRaffleDuration] = useState<number>(240); // 4 часа в минутах
+  const [raffleDuration, setRaffleDuration] = useState<number>(240);
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
+  // Состояние для анимаций
+  const [animations, setAnimations] = useState<{ [url: string]: Record<string, unknown> }>({});
 
   // Загружаем розыгрыш и призы при монтировании
   useEffect(() => {
     admin.getCurrentRaffle().then(raffle => {
-      // Если есть активный розыгрыш, инициализируем состояния его настройками
       if (raffle && !("message" in raffle)) {
         setTicketThreshold(raffle.raffle.ticketThreshold || 50);
-        setRaffleDuration((raffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000)); // переводим мс в минуты
+        setRaffleDuration((raffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000));
       }
     }).catch((err) => {
       console.error(err);
@@ -78,26 +76,31 @@ const RafflePage: React.FC = observer(() => {
     });
   }, [admin]);
 
-  // Проверяем, есть ли реально активный розыгрыш
+  // Загружаем анимации для призов
+  useEffect(() => {
+    const loadAnimations = async () => {
+      const newAnimations: { [url: string]: Record<string, unknown> } = {};
+      for (const prize of admin.prizes) {
+        const mediaFile = prize.media_file;
+        if (mediaFile && mediaFile.mimeType === 'application/json' && !animations[mediaFile.url]) {
+          try {
+            const response = await fetch(mediaFile.url);
+            const data = await response.json();
+            newAnimations[mediaFile.url] = data;
+          } catch (error) {
+            console.error(`Ошибка загрузки анимации для ${mediaFile.url}:`, error);
+          }
+        }
+      }
+      setAnimations(prev => ({ ...prev, ...newAnimations }));
+    };
+    loadAnimations();
+  }, [admin.prizes]);
+
   const currentRaffle = admin.currentRaffle;
   const hasActiveRaffle = currentRaffle && !("message" in currentRaffle);
 
-  // --- Завершить розыгрыш ---
-//   const handleCompleteRaffle = async () => {
-//     try {
-//       setIsCompletingRaffle(true);
-//       await admin.completeRaffle();
-//       toast.success("Розыгрыш завершён");
-//     } catch (error) {
-//       const serverError = error as ServerError;
-//       console.error("Ошибка при завершении розыгрыша:", error);
-//       toast.error(serverError?.response?.data?.message || "Ошибка при завершении розыгрыша");
-//     } finally {
-//       setIsCompletingRaffle(false);
-//     }
-//   };
-
-  // --- Назначить приз для текущего розыгрыша ---
+  // Назначить приз для текущего розыгрыша
   const handleSetPrize = async (prizeId: number) => {
     try {
       setAssigningPrizeId(prizeId);
@@ -113,9 +116,8 @@ const RafflePage: React.FC = observer(() => {
     }
   };
 
-  // --- Создание / редактирование приза ---
+  // Создание / редактирование приза
   const handleOpenCreatePrize = () => {
-    // Сбрасываем поля формы (создание)
     setEditPrizeId(null);
     setPrizeName("");
     setPrizeValue(0);
@@ -124,23 +126,25 @@ const RafflePage: React.FC = observer(() => {
     setDialogOpen(true);
   };
 
-  // Открыть форму редактирования конкретного приза
   const handleEditPrize = (prize: RafflePrize) => {
     setEditPrizeId(prize.id);
     setPrizeName(prize.name);
     setPrizeValue(prize.value);
     setPrizeDescription(prize.description || "");
-    setImageFile(null); // пока не выбирали новый файл
+    setImageFile(null);
     setDialogOpen(true);
   };
 
-  // При выборе файла
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Проверка размера
       if (file.size > MAX_FILE_SIZE) {
         toast.error("Максимальный размер файла: 25MB");
+        return;
+      }
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/json'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Разрешены только изображения и JSON-файлы");
         return;
       }
       setImageFile(file);
@@ -149,12 +153,9 @@ const RafflePage: React.FC = observer(() => {
     }
   };
 
-  // Сохранить приз (новый или отредактированный)
   const handleSavePrize = async () => {
     try {
       setIsSavingPrize(true);
-
-      // Валидация
       if (!prizeName.trim()) {
         toast.error("Введите название приза");
         return;
@@ -164,17 +165,14 @@ const RafflePage: React.FC = observer(() => {
         return;
       }
 
-      // FormData
       const formData = new FormData();
       formData.append("name", prizeName);
       formData.append("value", prizeValue.toString());
       formData.append("description", prizeDescription);
       if (imageFile) {
-        // Если пользователь выбрал новый файл
         formData.append("image", imageFile);
       }
 
-      // Если editPrizeId → обновляем, иначе → создаём
       if (editPrizeId) {
         await admin.updatePrize(editPrizeId, formData);
         toast.success("Приз успешно обновлён");
@@ -183,7 +181,6 @@ const RafflePage: React.FC = observer(() => {
         toast.success("Приз успешно создан");
       }
 
-      // Обновляем список
       await admin.getAllPrizes();
       setDialogOpen(false);
     } catch (error) {
@@ -195,22 +192,18 @@ const RafflePage: React.FC = observer(() => {
     }
   };
 
-  // --- Открыть диалог настроек розыгрыша ---
+  // Настройки розыгрыша
   const handleOpenSettings = () => {
-    // Загружаем текущие настройки из активного розыгрыша, если они есть
     if (currentRaffle && !("message" in currentRaffle)) {
       setTicketThreshold(currentRaffle.raffle.ticketThreshold || 50);
-      setRaffleDuration((currentRaffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000)); // переводим мс в минуты
+      setRaffleDuration((currentRaffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000));
     }
     setSettingsDialogOpen(true);
   };
 
-  // --- Сохранить настройки розыгрыша ---
   const handleSaveSettings = async () => {
     try {
       setIsUpdatingSettings(true);
-      
-      // Валидация
       if (ticketThreshold <= 0) {
         toast.error("Пороговое значение билетов должно быть положительным");
         return;
@@ -222,7 +215,7 @@ const RafflePage: React.FC = observer(() => {
       
       await admin.updateRaffleSettings({
         ticketThreshold,
-        raffleDuration // API ожидает минуты, которые автоматически конвертирует в мс
+        raffleDuration
       });
       
       toast.success("Настройки розыгрыша обновлены");
@@ -234,6 +227,29 @@ const RafflePage: React.FC = observer(() => {
     } finally {
       setIsUpdatingSettings(false);
     }
+  };
+
+  // Отображение медиа приза
+  const renderPrizeMedia = (prize: RafflePrize) => {
+    const mediaFile = prize.media_file;
+    if (mediaFile) {
+      const { url, mimeType } = mediaFile;
+      if (mimeType === 'application/json' && animations[url]) {
+        return (
+          <Lottie
+            animationData={animations[url]}
+            loop={true}
+            autoplay={true}
+            style={{ width: 40, height: 40 }}
+          />
+        );
+      } else if (mimeType.startsWith('image/')) {
+        return <img src={url} alt={prize.name} className="h-10" />;
+      }
+    } else if (prize.imageUrl) {
+      return <img src={prize.imageUrl} alt={prize.name} className="h-10" />;
+    }
+    return "Нет";
   };
 
   return (
@@ -254,16 +270,10 @@ const RafflePage: React.FC = observer(() => {
                 ? currentRaffle.raffle.raffle_prize.name
                 : "Не назначен"}
             </p>
-            {/* Добавляем отображение настраиваемых параметров */}
             <p>Минимум билетов для таймера: {currentRaffle.raffle.ticketThreshold || 50}</p>
             <p>Продолжительность: {((currentRaffle.raffle.raffleDuration || 4 * 60 * 60 * 1000) / (60 * 1000))} минут</p>
-            
             <div className="mt-2 flex gap-2">
-              {/* Кнопка для открытия диалога настроек */}
-              <Button 
-                variant="outline" 
-                onClick={handleOpenSettings}
-              >
+              <Button variant="outline" onClick={handleOpenSettings}>
                 Изменить настройки
               </Button>
             </div>
@@ -300,19 +310,8 @@ const RafflePage: React.FC = observer(() => {
                   <TableCell>{prize.name}</TableCell>
                   <TableCell>{prize.value}</TableCell>
                   <TableCell>{prize.description}</TableCell>
-                  <TableCell>
-                    {prize.imageUrl ? (
-                      <img
-                        src={prize.imageUrl}
-                        alt={prize.name}
-                        className="h-10"
-                      />
-                    ) : (
-                      "Нет"
-                    )}
-                  </TableCell>
+                  <TableCell>{renderPrizeMedia(prize)}</TableCell>
                   <TableCell className="text-right">
-                    {/* Кнопка "Назначить" (только если есть активный розыгрыш) */}
                     {hasActiveRaffle && (
                       <Button
                         variant="outline"
@@ -322,7 +321,6 @@ const RafflePage: React.FC = observer(() => {
                         {isAssigningThisPrize ? "Назначаем..." : "Назначить"}
                       </Button>
                     )}
-                    {/* Кнопка "Изменить" */}
                     <Button
                       variant="outline"
                       className="ml-2"
@@ -344,7 +342,7 @@ const RafflePage: React.FC = observer(() => {
           <DialogHeader>
             <DialogTitle>{editPrizeId ? "Редактировать приз" : "Создать приз"}</DialogTitle>
             <DialogDescription>
-              Заполните поля и при необходимости загрузите новый файл изображения (до 25MB)
+              Заполните поля и при необходимости загрузите новый файл изображения или анимации (до 25MB)
             </DialogDescription>
           </DialogHeader>
 
@@ -375,8 +373,8 @@ const RafflePage: React.FC = observer(() => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Изображение (до 25 MB)</Label>
-              <Input type="file" accept="image/*" onChange={handleFileChange} />
+              <Label>Изображение или анимация (до 25 MB)</Label>
+              <Input type="file" accept="image/*,application/json" onChange={handleFileChange} />
               {imageFile && (
                 <p style={{ fontSize: "12px", wordBreak: "break-all" }}>
                   Выбран файл: {imageFile.name}
@@ -426,7 +424,6 @@ const RafflePage: React.FC = observer(() => {
                 className="col-span-3"
               />
             </div>
-            
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="raffleDuration" className="text-right">
                 Время (мин)
@@ -443,17 +440,10 @@ const RafflePage: React.FC = observer(() => {
           </div>
           
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setSettingsDialogOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setSettingsDialogOpen(false)}>
               Отмена
             </Button>
-            <Button 
-              onClick={handleSaveSettings} 
-              disabled={isUpdatingSettings}
-            >
+            <Button onClick={handleSaveSettings} disabled={isUpdatingSettings}>
               {isUpdatingSettings ? "Сохранение..." : "Сохранить"}
             </Button>
           </DialogFooter>

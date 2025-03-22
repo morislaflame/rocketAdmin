@@ -111,6 +111,7 @@ export type CreateProductDTO = Omit<Product, "id">;
     imageUrl: string | null;
     value: number;
     description: string | null;
+    media_file: MediaFile | null;
   }
 
   export interface RecentParticipant {
@@ -172,6 +173,7 @@ export type CreateProductDTO = Omit<Product, "id">;
         imageUrl: string;
         value: number;
         description: string;
+        media_file: MediaFile | null;
       }
       },
       user: {
@@ -226,7 +228,7 @@ export interface LeaderboardData {
     mimeType: string;
     size: number;
     bucket: string;
-    url: string | null;
+    url: string;
     entityType: string;
     entityId: number | null;
     createdAt: Date;
