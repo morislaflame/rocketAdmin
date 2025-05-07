@@ -190,6 +190,77 @@ export const updateLeaderboardSettings = async (settings: {
 };
 
 
+// ====== Cases ======
+
+export const getCases = async () => {
+    const { data } = await $authHost.get('api/case');
+    return data;
+}
+
+export const getCaseById = async (id: number) => {
+    const { data } = await $authHost.get(`api/case/${id}`);
+    return data;
+}
+
+export const createCase = async (formData: FormData) => {
+    const { data } = await $authHost.post('api/case', formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return data;
+}
+
+export const updateCase = async (id: number, formData: FormData) => {
+    const { data } = await $authHost.put(`api/case/${id}`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return data;
+}
+
+export const deleteCase = async (id: number) => {
+    const { data } = await $authHost.delete(`api/case/${id}`);
+    return data;
+}
+
+export const getCasesStats = async () => {
+    const { data } = await $authHost.get('api/case/stats');
+    return data;
+}
+
+// ====== Case Items ======
+
+export const addCaseItem = async (caseId: number, formData: FormData) => {
+    const { data } = await $authHost.post(`api/case/${caseId}/item`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return data;
+}
+
+export const updateCaseItem = async (itemId: number, formData: FormData) => {
+    const { data } = await $authHost.put(`api/case/item/${itemId}`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return data;
+}
+
+export const deleteCaseItem = async (itemId: number) => {
+    const { data } = await $authHost.delete(`api/case/item/${itemId}`);
+    return data;
+}
+
+export const giveCaseToUser = async (userId: number, caseId: number, quantity: number) => {
+    const { data } = await $authHost.post('api/case/give', { userId, caseId, quantity });
+    return data;
+}
+
+
 
 
 

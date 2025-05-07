@@ -9,7 +9,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, LEADERBOARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE } from "@/utils/consts"
+import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, LEADERBOARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE, CASES_ROUTE } from "@/utils/consts"
 
 const taskComponents = [
     {
@@ -65,6 +65,14 @@ const usersComponents = [
         title: "Запрошенные призы",
         href: REQUESTED_PRIZES_ROUTE,
         description: "Управление запрошенными пользователями призами."
+    }
+]
+
+const casesComponents = [
+    {
+        title: "Кейсы",
+        href: CASES_ROUTE,
+        description: "Управление кейсами."
     }
 ]
 
@@ -129,6 +137,23 @@ const Navigation: React.FC = () => {
                     <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[400px] md:grid-cols-2">
                             {usersComponents.map((component) => (
+                                <ListItem
+                                    key={component.title}
+                                    title={component.title}
+                                    href={component.href}
+                                >
+                                    {component.description}
+                                </ListItem>
+                            ))}
+                        </ul>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                    <NavigationMenuTrigger>Кейсы</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                        <ul className="grid w-[400px] gap-3 p-4 md:w-[400px] md:grid-cols-2">
+                            {casesComponents.map((component) => (
                                 <ListItem
                                     key={component.title}
                                     title={component.title}

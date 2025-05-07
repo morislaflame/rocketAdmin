@@ -235,3 +235,34 @@ export interface LeaderboardData {
   }
   
   
+export interface Case {
+  id: number;
+  name: string;
+  type: string;
+  description?: string;
+  price?: number;
+  starsPrice?: number;
+  pointsPrice?: number;
+  imageUrl: string;
+  isActive: boolean;
+  case_items: CaseItem[];
+  media_file: MediaFile | null;
+}
+
+export type CreateCaseDTO = Omit<Case, "id" | "case_items" | "isActive">;
+
+export interface CaseItem {
+  id: number;
+  type: string;
+  value: number | null;
+  probability: number;
+  imageUrl: string | null;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  caseId: number;
+  rafflePrizeId: number;
+  prize: RafflePrize;
+  media_file: MediaFile | null;
+}
+

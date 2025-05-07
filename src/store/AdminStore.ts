@@ -10,6 +10,7 @@ import {
     CreateProductDTO,
     CreateRaffleTicketPackageDTO,
     UserPrize,
+    Case,
 } from "@/types/types";
 import {
     getDailyRewards,
@@ -41,6 +42,16 @@ import {
     getLeaderboard,
     getLeaderboardSettings,
     updateLeaderboardSettings,
+    getCases,
+    getCaseById,
+    createCase,
+    updateCase,
+    deleteCase,
+    getCasesStats,
+    addCaseItem,
+    updateCaseItem,
+    deleteCaseItem,
+    giveCaseToUser,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -53,6 +64,8 @@ export default class AdminStore {
     _prizes: RafflePrize[] = [];
     _packages: RaffleTicketPackage[] = [];
     _requestedPrizes: UserPrize[] = [];
+    _cases: Case[] = [];
+    _casesStats: any = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -95,6 +108,14 @@ export default class AdminStore {
         this._requestedPrizes = prizes;
     }
 
+    setCases(cases: Case[]) {
+        this._cases = cases;
+    }
+
+    setCasesStats(stats: any) {
+        this._casesStats = stats;
+    }
+
     // Getters
     get loading() {
         return this._loading;
@@ -130,6 +151,14 @@ export default class AdminStore {
 
     get requestedPrizes() {
         return this._requestedPrizes;
+    }
+
+    get cases() {
+        return this._cases;
+    }
+
+    get casesStats() {
+        return this._casesStats;
     }
 
     // ====== DailyReward ======
@@ -575,6 +604,173 @@ export default class AdminStore {
             runInAction(() => {
                 this.setLoading(false);
             });
+        }
+    }
+
+    // ====== Cases ======
+    async getCases() {
+        this.setLoading(true);
+        try {
+            const data = await getCases();
+            runInAction(() => {
+                this.setCases(data);
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при получении кейсов:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
+        }
+    }
+
+    async getCaseById(id: number) {
+        try {
+            const data = await getCaseById(id);
+            return data;
+        } catch (error) {
+            console.error("Ошибка при получении кейса:", error);
+            throw error;
+        }
+    }
+
+    async createCase(formData: FormData) {
+        try {
+            const data = await createCase(formData);
+            runInAction(() => {
+                this._cases = [...this._cases, data];
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при создании кейса:", error);
+            throw error;
+        }
+    }
+
+    async updateCase(id: number, formData: FormData) {
+        try {
+            const data = await updateCase(id, formData);
+            runInAction(() => {
+                this._cases = this._cases.map(c => 
+                    c.id === id ? data : c
+                );
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при обновлении кейса:", error);
+            throw error;
+        }
+    }
+
+    async deleteCase(id: number) {
+        try {
+            const data = await deleteCase(id);
+            runInAction(() => {
+                this._cases = this._cases.filter(c => c.id !== id);
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при удалении кейса:", error);
+            throw error;
+        }
+    }
+
+    async getCasesStats() {
+        this.setLoading(true);
+        try {
+            const data = await getCasesStats();
+            runInAction(() => {
+                this.setCasesStats(data);
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при получении статистики кейсов:", error);
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setLoading(false);
+            });
+        }
+    }
+
+    // ====== Case Items ======
+    async addCaseItem(caseId: number, formData: FormData) {
+        try {
+            const data = await addCaseItem(caseId, formData);
+            runInAction(() => {
+                // Обновляем список предметов в конкретном кейсе
+                this._cases = this._cases.map(c => {
+                    if (c.id === caseId) {
+                        return {
+                            ...c,
+                            case_items: [...(c.case_items || []), data]
+                        };
+                    }
+                    return c;
+                });
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при добавлении предмета в кейс:", error);
+            throw error;
+        }
+    }
+
+    async updateCaseItem(itemId: number, caseId: number, formData: FormData) {
+        try {
+            const data = await updateCaseItem(itemId, formData);
+            runInAction(() => {
+                // Обновляем конкретный предмет в конкретном кейсе
+                this._cases = this._cases.map(c => {
+                    if (c.id === caseId && c.case_items) {
+                        return {
+                            ...c,
+                            case_items: c.case_items.map(item => 
+                                item.id === itemId ? data : item
+                            )
+                        };
+                    }
+                    return c;
+                });
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при обновлении предмета кейса:", error);
+            throw error;
+        }
+    }
+
+    async deleteCaseItem(itemId: number, caseId: number) {
+        try {
+            const data = await deleteCaseItem(itemId);
+            runInAction(() => {
+                // Удаляем предмет из конкретного кейса
+                this._cases = this._cases.map(c => {
+                    if (c.id === caseId && c.case_items) {
+                        return {
+                            ...c,
+                            case_items: c.case_items.filter(item => item.id !== itemId)
+                        };
+                    }
+                    return c;
+                });
+            });
+            return data;
+        } catch (error) {
+            console.error("Ошибка при удалении предмета из кейса:", error);
+            throw error;
+        }
+    }
+
+    async giveCaseToUser(userId: number, caseId: number, quantity: number) {
+        try {
+            const data = await giveCaseToUser(userId, caseId, quantity);
+            return data;
+        } catch (error) {
+            console.error("Ошибка при выдаче кейса пользователю:", error);
+            throw error;
         }
     }
 }
