@@ -9,7 +9,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, LEADERBOARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE, CASES_ROUTE } from "@/utils/consts"
+import { ALL_RAFFLES_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, LEADERBOARD_ROUTE, RAFFLE_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, REQUESTED_PRIZES_ROUTE, CASES_ROUTE, REFERRAL_PAYOUT_ROUTE } from "@/utils/consts"
 
 const taskComponents = [
     {
@@ -65,6 +65,11 @@ const usersComponents = [
         title: "Запрошенные призы",
         href: REQUESTED_PRIZES_ROUTE,
         description: "Управление запрошенными пользователями призами."
+    },
+    {
+        title: "Выплаты",
+        href: REFERRAL_PAYOUT_ROUTE,
+        description: "Управление выплатами."
     }
 ]
 

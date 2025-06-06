@@ -44,6 +44,7 @@ const RafflePage: React.FC = observer(() => {
   const [prizeValue, setPrizeValue] = useState<number>(0);
   const [prizeDescription, setPrizeDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [prizeTonPrice, setPrizeTonPrice] = useState<number>(0);
 
   // Состояния для кнопок
   const [isSavingPrize, setIsSavingPrize] = useState(false);
@@ -122,6 +123,7 @@ const RafflePage: React.FC = observer(() => {
     setPrizeName("");
     setPrizeValue(0);
     setPrizeDescription("");
+    setPrizeTonPrice(0);
     setImageFile(null);
     setDialogOpen(true);
   };
@@ -131,6 +133,7 @@ const RafflePage: React.FC = observer(() => {
     setPrizeName(prize.name);
     setPrizeValue(prize.value);
     setPrizeDescription(prize.description || "");
+    setPrizeTonPrice(prize.tonPrice || 0);
     setImageFile(null);
     setDialogOpen(true);
   };
@@ -169,6 +172,7 @@ const RafflePage: React.FC = observer(() => {
       formData.append("name", prizeName);
       formData.append("value", prizeValue.toString());
       formData.append("description", prizeDescription);
+      formData.append("tonPrice", prizeTonPrice.toString());
       if (imageFile) {
         formData.append("image", imageFile);
       }
@@ -238,7 +242,7 @@ const RafflePage: React.FC = observer(() => {
         return (
           <Lottie
             animationData={animations[url]}
-            loop={true}
+            loop={false}
             autoplay={true}
             style={{ width: 40, height: 40 }}
           />
@@ -296,6 +300,7 @@ const RafflePage: React.FC = observer(() => {
               <TableHead className="w-[50px]">ID</TableHead>
               <TableHead>Название</TableHead>
               <TableHead>Стоимость</TableHead>
+              <TableHead>Цена в TON</TableHead>
               <TableHead>Описание</TableHead>
               <TableHead>Изображение</TableHead>
               <TableHead className="text-right">Действие</TableHead>
@@ -309,6 +314,9 @@ const RafflePage: React.FC = observer(() => {
                   <TableCell>{prize.id}</TableCell>
                   <TableCell>{prize.name}</TableCell>
                   <TableCell>{prize.value}</TableCell>
+                  <TableCell>
+                    {prize.tonPrice ? Number(prize.tonPrice).toFixed(1) : '-'}
+                  </TableCell>
                   <TableCell>{prize.description}</TableCell>
                   <TableCell>{renderPrizeMedia(prize)}</TableCell>
                   <TableCell className="text-right">
@@ -362,6 +370,22 @@ const RafflePage: React.FC = observer(() => {
                 value={prizeValue}
                 onChange={(e) => setPrizeValue(Number(e.target.value))}
                 placeholder="Например: 1000"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Цена в TON</Label>
+              <Input
+                type="number"
+                value={prizeTonPrice}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  if (!isNaN(value)) {
+                    setPrizeTonPrice(Number(value.toFixed(1)));
+                  } else {
+                    setPrizeTonPrice(0);
+                  }
+                }}
+                placeholder="Например: 0.5"
               />
             </div>
             <div className="flex flex-col gap-2">

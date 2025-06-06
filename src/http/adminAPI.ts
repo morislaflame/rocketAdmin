@@ -198,7 +198,7 @@ export const getCases = async () => {
 }
 
 export const getCaseById = async (id: number) => {
-    const { data } = await $authHost.get(`api/case/${id}`);
+    const { data } = await $authHost.get(`api/case/admin/${id}`);
     return data;
 }
 
@@ -259,6 +259,60 @@ export const giveCaseToUser = async (userId: number, caseId: number, quantity: n
     const { data } = await $authHost.post('api/case/give', { userId, caseId, quantity });
     return data;
 }
+
+// ====== Referral Payout Requests (Admin) ======
+
+// Типы для запросов и ответов (можно вынести в types.ts, если будут использоваться где-то еще)
+export interface AdminReferralPayoutRequest {
+  id: number;
+  amount: string; // DECIMAL приходит как строка
+  walletAddress: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNotes?: string | null;
+  requestedAt: string;
+  processedAt?: string | null;
+  userId: number;
+  user?: { // Информация о пользователе
+    id: number;
+    email?: string | null;
+    username?: string | null;
+    telegramId?: string | null;
+  };
+  currentUserWithdrawableBalance?: string | number | null; // Добавлено на бэкенде
+}
+
+export interface AdminPayoutRequestsResponse {
+  rows: AdminReferralPayoutRequest[];
+  count: number;
+  currentPage: number;
+  totalPages: number;
+}
+
+interface ProcessPayoutRequestPayload {
+  newStatus: 'approved' | 'rejected';
+  adminNotes?: string;
+}
+
+export const getAdminReferralPayoutRequests = async (params: {
+  status?: 'pending' | 'approved' | 'rejected';
+  userId?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}): Promise<AdminPayoutRequestsResponse> => {
+  const { data } = await $authHost.get('api/referral/admin/referral-payout-requests', { params });
+  return data;
+};
+
+export const processReferralPayoutRequest = async (
+  requestId: number,
+  payload: ProcessPayoutRequestPayload
+): Promise<AdminReferralPayoutRequest> => {
+  // Используем POST в соответствии с referralRouter.js
+  const { data } = await $authHost.post(`api/referral/admin/referral-payout-requests/${requestId}`, payload);
+  return data;
+};
 
 
 

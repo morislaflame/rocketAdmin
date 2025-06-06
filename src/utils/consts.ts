@@ -13,3 +13,4 @@ export const REQUESTED_PRIZES_ROUTE = '/admin/requested-prizes';
 export const LEADERBOARD_ROUTE = '/admin/leaderboard';
 export const CASES_ROUTE = '/admin/cases';
 export const CASE_DETAIL_ROUTE = '/admin/case';
+export const REFERRAL_PAYOUT_ROUTE = '/admin/referral-payout';

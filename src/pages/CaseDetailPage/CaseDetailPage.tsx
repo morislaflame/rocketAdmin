@@ -65,6 +65,9 @@ const CaseDetailPage: React.FC = observer(() => {
   // Добавьте стейт для хранения строкового значения (для ввода)
   const [_casePriceStr, setCasePriceStr] = useState("");
 
+  // Добавьте состояние для хранения поискового запроса
+  const [prizeSearchQuery, setPrizeSearchQuery] = useState("");
+
   // Загрузка данных о кейсе и призах при монтировании
   useEffect(() => {
     if (!id) return;
@@ -345,7 +348,7 @@ const CaseDetailPage: React.FC = observer(() => {
             <div className="flex justify-center">
               <Lottie
                 animationData={animations[url]}
-                loop={true}
+                loop={false}
                 autoplay={true}
                 style={{ width: 40, height: 40 }}
               />
@@ -385,7 +388,7 @@ const CaseDetailPage: React.FC = observer(() => {
         return (
           <Lottie
             animationData={animations[url]}
-            loop={true}
+            loop={false}
             autoplay={true}
             style={{ width: 40, height: 40 }}
           />
@@ -437,6 +440,11 @@ const CaseDetailPage: React.FC = observer(() => {
     return Number(price).toFixed(2);
   };
 
+  // Добавьте обработчик закрытия диалога
+  const handleDialogClose = () => {
+    setItemDialogOpen(false);
+    setPrizeSearchQuery(""); // Сбрасываем поисковый запрос
+  };
 
   if (!caseData) {
     return <div className="p-4">Загрузка данных кейса...</div>;
@@ -540,7 +548,7 @@ const CaseDetailPage: React.FC = observer(() => {
       </Table>
 
       {/* Диалог создания/редактирования предмета */}
-      <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
+      <Dialog open={itemDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="w-auto">
           <DialogHeader>
             <DialogTitle>{editItemId ? "Редактировать предмет" : "Добавить предмет"}</DialogTitle>
@@ -599,37 +607,53 @@ const CaseDetailPage: React.FC = observer(() => {
                     <SelectValue placeholder="Выберите приз" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[400px]">
-                    {admin.prizes.map((prize) => (
-                      <SelectItem key={prize.id} value={prize.id.toString()}>
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 bg-black rounded-md overflow-hidden flex items-center justify-center">
-                            {prize.media_file?.mimeType === 'application/json' && animations[prize.media_file.url] ? (
-                              <Lottie 
-                                animationData={animations[prize.media_file.url]} 
-                                style={{ width: 30, height: 30 }} 
-                                loop={true} 
-                                autoplay={true} 
-                              />
-                            ) : prize.media_file ? (
-                              <img 
-                                src={prize.media_file.url} 
-                                alt="" 
-                                className="max-w-full max-h-full object-contain" 
-                              />
-                            ) : prize.imageUrl ? (
-                              <img 
-                                src={prize.imageUrl} 
-                                alt="" 
-                                className="max-w-full max-h-full object-contain" 
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-400">Нет</span>
-                            )}
+                    <div className="px-2 pb-2">
+                      <Input
+                        placeholder="Поиск приза..."
+                        value={prizeSearchQuery}
+                        onChange={(e) => {
+                          e.stopPropagation(); // Предотвращаем всплытие события
+                          setPrizeSearchQuery(e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике
+                        className="h-8"
+                      />
+                    </div>
+                    {admin.prizes
+                      .filter(prize => 
+                        prize.name.toLowerCase().includes(prizeSearchQuery.toLowerCase())
+                      )
+                      .map((prize) => (
+                        <SelectItem key={prize.id} value={prize.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-black rounded-md overflow-hidden flex items-center justify-center">
+                              {prize.media_file?.mimeType === 'application/json' && animations[prize.media_file.url] ? (
+                                <Lottie 
+                                  animationData={animations[prize.media_file.url]} 
+                                  style={{ width: 30, height: 30 }} 
+                                  loop={false} 
+                                  autoplay={false} 
+                                />
+                              ) : prize.media_file ? (
+                                <img 
+                                  src={prize.media_file.url} 
+                                  alt="" 
+                                  className="max-w-full max-h-full object-contain" 
+                                />
+                              ) : prize.imageUrl ? (
+                                <img 
+                                  src={prize.imageUrl} 
+                                  alt="" 
+                                  className="max-w-full max-h-full object-contain" 
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-400">Нет</span>
+                              )}
+                            </div>
+                            <span className="ml-1">{prize.name} ({prize.value} pts.)</span>
                           </div>
-                          <span className="ml-1">{prize.name} ({prize.value} руб.)</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

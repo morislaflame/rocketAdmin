@@ -112,6 +112,7 @@ export type CreateProductDTO = Omit<Product, "id">;
     value: number;
     description: string | null;
     media_file: MediaFile | null;
+    tonPrice: number | null;
   }
 
   export interface RecentParticipant {

@@ -2,7 +2,7 @@
 import LoginPage from './pages/LoginPage/LoginPage';
 import NotAdminPage from './pages/NotAdminPage/NotAdminPage';
 import AdminPage from './pages/AdminPage/AdminPage';
-import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, ALL_RAFFLES_ROUTE, REQUESTED_PRIZES_ROUTE, LEADERBOARD_ROUTE, CASES_ROUTE, CASE_DETAIL_ROUTE } from './utils/consts';
+import { LOGIN_ROUTE, NOT_FOUND_ROUTE, ADMIN_ROUTE, RAFFLE_ROUTE, ATTEMPTS_PACKAGE_ROUTE, DAILY_REWARD_ROUTE, TASKS_ROUTE, TICKETS_PACKAGE_ROUTE, USERS_ROUTE, ALL_RAFFLES_ROUTE, REQUESTED_PRIZES_ROUTE, LEADERBOARD_ROUTE, CASES_ROUTE, CASE_DETAIL_ROUTE, REFERRAL_PAYOUT_ROUTE } from './utils/consts';
 import { IRoute, UserInfo } from './types/types';
 import AttemptsPackagePage from './pages/AttemptsPackagePage/AttemptsPackagePage';
 import RafflePage from './pages/RafflePage/RafflePage';
@@ -15,6 +15,7 @@ import RequestedPrizesPage from './pages/RequestedPrizesPage';
 import LeaderboardPage from './pages/LeaderboardPage/LeaderboardPage';
 import CasesPage from './pages/CasesPage/CasesPage';
 import CaseDetailPage from './pages/CaseDetailPage/CaseDetailPage';
+import ReferralPayoutPage from './pages/ReferralPayout/ReferralPayoutPage';
 
 export const authRoutes = (user: UserInfo | null) => {
     console.log("User in authRoutes:", user);
@@ -79,6 +80,10 @@ export const authRoutes = (user: UserInfo | null) => {
         routes.push({
             path: `${CASE_DETAIL_ROUTE}/:id`,
             Component: CaseDetailPage
+        });
+        routes.push({
+            path: REFERRAL_PAYOUT_ROUTE,
+            Component: ReferralPayoutPage
         });
     } else {
         console.log("User is not admin");

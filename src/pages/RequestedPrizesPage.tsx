@@ -29,7 +29,7 @@ const RequestedPrizesPage: React.FC = observer(() => {
     const loadAnimations = async () => {
       const newAnimations: { [url: string]: Record<string, unknown> } = {};
       for (const prize of admin.requestedPrizes) {
-        const mediaFile = prize.raffle?.raffle_prize?.media_file;
+        const mediaFile = prize.media_file;
         if (mediaFile && mediaFile.mimeType === 'application/json' && !animations[mediaFile.url]) {
           try {
             const response = await fetch(mediaFile.url);
@@ -137,11 +137,11 @@ const RequestedPrizesPage: React.FC = observer(() => {
           <Card key={prize.id}>
             <CardHeader>
               <div className="flex justify-between">
-                <div className="flex flex-col items-center">
-                  <CardTitle>{prize.raffle.raffle_prize.name}</CardTitle>
-                  {renderPrizeMedia(prize.raffle?.raffle_prize)}
+                <div className="flex flex-coraffle_prizel items-center">
+                  <CardTitle>{prize.name}</CardTitle>
+                  {renderPrizeMedia(prize)}
                   <CardDescription>
-                    Ценность: {prize.raffle.raffle_prize.value} токенов
+                    Ценность: {prize.value} токенов
                   </CardDescription>
                 </div>
                 <Badge variant="outline">ID: {prize.id}</Badge>

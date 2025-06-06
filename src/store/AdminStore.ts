@@ -52,6 +52,10 @@ import {
     updateCaseItem,
     deleteCaseItem,
     giveCaseToUser,
+    getAdminReferralPayoutRequests,
+    processReferralPayoutRequest,
+    AdminReferralPayoutRequest,
+    AdminPayoutRequestsResponse,
 } from "../http/adminAPI";
 
 export default class AdminStore {
@@ -66,6 +70,13 @@ export default class AdminStore {
     _requestedPrizes: UserPrize[] = [];
     _cases: Case[] = [];
     _casesStats: any = null;
+
+    // New state for referral payout requests
+    _referralPayoutRequests: AdminReferralPayoutRequest[] = [];
+    _referralPayoutRequestsCount = 0;
+    _referralPayoutRequestsCurrentPage = 1;
+    _referralPayoutRequestsTotalPages = 1;
+    _referralPayoutRequestsLoading = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -116,6 +127,23 @@ export default class AdminStore {
         this._casesStats = stats;
     }
 
+    // New setters for referral payouts
+    setReferralPayoutRequests(requests: AdminReferralPayoutRequest[]) {
+        this._referralPayoutRequests = requests;
+    }
+    setReferralPayoutRequestsCount(count: number) {
+        this._referralPayoutRequestsCount = count;
+    }
+    setReferralPayoutRequestsCurrentPage(page: number) {
+        this._referralPayoutRequestsCurrentPage = page;
+    }
+    setReferralPayoutRequestsTotalPages(pages: number) {
+        this._referralPayoutRequestsTotalPages = pages;
+    }
+    setReferralPayoutRequestsLoading(loading: boolean) {
+        this._referralPayoutRequestsLoading = loading;
+    }
+
     // Getters
     get loading() {
         return this._loading;
@@ -159,6 +187,23 @@ export default class AdminStore {
 
     get casesStats() {
         return this._casesStats;
+    }
+
+    // New getters for referral payouts
+    get referralPayoutRequests() {
+        return this._referralPayoutRequests;
+    }
+    get referralPayoutRequestsCount() {
+        return this._referralPayoutRequestsCount;
+    }
+    get referralPayoutRequestsCurrentPage() {
+        return this._referralPayoutRequestsCurrentPage;
+    }
+    get referralPayoutRequestsTotalPages() {
+        return this._referralPayoutRequestsTotalPages;
+    }
+    get referralPayoutRequestsLoading() {
+        return this._referralPayoutRequestsLoading;
     }
 
     // ====== DailyReward ======
@@ -770,6 +815,60 @@ export default class AdminStore {
             return data;
         } catch (error) {
             console.error("Ошибка при выдаче кейса пользователю:", error);
+            throw error;
+        }
+    }
+
+    // ====== Referral Payout Requests (Admin) ======
+    async fetchAdminReferralPayoutRequests(params: {
+        status?: 'pending' | 'approved' | 'rejected';
+        userId?: number;
+        page?: number;
+        limit?: number;
+        sortBy?: string;
+        sortOrder?: 'ASC' | 'DESC';
+    }) {
+        this.setReferralPayoutRequestsLoading(true);
+        try {
+            const data: AdminPayoutRequestsResponse = await getAdminReferralPayoutRequests(params);
+            runInAction(() => {
+                this.setReferralPayoutRequests(data.rows);
+                this.setReferralPayoutRequestsCount(data.count);
+                this.setReferralPayoutRequestsCurrentPage(data.currentPage);
+                this.setReferralPayoutRequestsTotalPages(data.totalPages);
+            });
+            return data;
+        } catch (error) {
+            console.error("Error fetching admin referral payout requests:", error);
+            // Тут можно добавить уведомление для пользователя админ-панели
+            throw error;
+        } finally {
+            runInAction(() => {
+                this.setReferralPayoutRequestsLoading(false);
+            });
+        }
+    }
+
+    async processReferralPayoutRequest(
+        requestId: number,
+        payload: { newStatus: 'approved' | 'rejected'; adminNotes?: string }
+    ) {
+        // Оптимистичное обновление или обновление после ответа сервера
+        try {
+            const updatedRequest = await processReferralPayoutRequest(requestId, payload);
+            runInAction(() => {
+                this._referralPayoutRequests = this._referralPayoutRequests.map(req =>
+                    req.id === requestId ? updatedRequest : req
+                );
+                // Если запрос был одобрен или отклонен, он может исчезнуть из 'pending' фильтра,
+                // поэтому может потребоваться перезагрузка списка, если текущий фильтр 'pending'.
+                // Либо можно просто обновить существующий элемент.
+                // Для простоты пока просто обновляем элемент.
+            });
+            return updatedRequest;
+        } catch (error) {
+            console.error("Error processing referral payout request:", error);
+            // Уведомление об ошибке
             throw error;
         }
     }
